@@ -11,7 +11,7 @@ POST https://foreverours.vercel.app/api/tap/water
 Authorization: Bearer <WATER_TAP_TOKEN>
 ```
 
-The server logs 2000 ml and ignores a repeat within a minute. The key lives in Vercel as `WATER_TAP_TOKEN` and never in this repo.
+The server logs 2000 ml. **The one-minute repeat filter is temporarily disabled for NFC range testing: every successful tap adds another 2000 ml.** Restore `REPEAT_WINDOW_MS` to `60_000` in the US app's `app/api/tap/water/route.ts` after testing, and restore the repeat-filter test. The key lives in Vercel as `WATER_TAP_TOKEN` and never in this repo.
 
 ## Phone setup (Automate flow)
 
