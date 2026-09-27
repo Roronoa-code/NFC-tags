@@ -1,6 +1,6 @@
 # NFC-tags
 
-Tap an NFC sticker on my water bottle to log 1000 ml in the US app, without opening anything.
+Tap an NFC sticker on my water bottle to log 2000 ml in the US app, without opening anything.
 
 ## How it works
 
@@ -11,17 +11,22 @@ POST https://foreverours.vercel.app/api/tap/water
 Authorization: Bearer <WATER_TAP_TOKEN>
 ```
 
-The server logs 1000 ml and ignores a repeat within a minute. The key lives in Vercel as `WATER_TAP_TOKEN` and never in this repo.
+The server logs 2000 ml and ignores a repeat within a minute. The key lives in Vercel as `WATER_TAP_TOKEN` and never in this repo.
 
 ## Phone setup (Automate flow)
 
-1. **Flow beginning** → **NFC tag scanned**
-2. → **HTTP request**: URL above, method `POST`, request headers `{"Authorization": "Bearer <key>"}`
-3. → **Toast show** (optional)
-4. → loop back to **NFC tag scanned**
-5. Start the flow once; it keeps waiting in the background.
+The configured flow is **US Water - 2000 ml**:
 
-Write the sticker once with Automate's **NFC tag write** block, NDEF type "Automate".
+1. **Flow beginning** → **Failure catch** → **NFC tag scanned** (Automate type, content output variable `tag`).
+2. **Expression true**: `tag = "us-water"`. NO loops back to NFC; YES continues.
+3. **HTTP request**: URL above, method `POST`, request headers `{"Authorization": "Bearer <key>"}`. Save the response to text variable `response`, and the status code to `status`.
+4. **Toast show**: `status = 200 ? jsonDecode(response)["message"] : "Water not logged (HTTP " ++ status ++ "). Try again."`
+5. Loop back to **Failure catch**. Its FAIL path shows “Water tap failed. Check internet, wait a minute and tap again.” before looping back.
+6. Start the flow once. Enable Automate's **Run on system startup** and exempt it from battery optimization.
+
+Write the sticker once using **Write tag** inside the NFC scanned block, with Tag content `"us-water"`. The secret stays in the phone flow, not on the sticker. Do not publish or commit a configured flow export: it contains the secret.
+
+Keep the phone unlocked when tapping; NFC scanning while locked is not guaranteed. Internet access is required. A failed request is reported, not queued for a later water entry.
 
 ## Stickers
 
